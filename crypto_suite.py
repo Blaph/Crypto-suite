@@ -1,19 +1,76 @@
 import random
 import copy
 
-# Executes XOR between a bit of a certain key and a bit of a given (plain or cyphered) text
+# Converts a str to binary
+def _to_binary(message):
+    return bin(message)[2:].zfill(8)
+
 def _xor_letters(key, letter):
     # Convert letters into integers using ord()
     # Then, convert them in binary using 'bin()', and trim their prefix '0b' using [2:]
     # Finally, fill with 0 to the left until length of the string is 8 characters using 'zfill(8)'
-    bin_letter1 = bin(key)[2:].zfill(8)
-    bin_letter2 = bin(ord(letter))[2:].zfill(8)
+    bin_letter1 = _to_binary(key)
+    bin_letter2 = _to_binary(ord(letter))
 
     # bitwise XOR
     result = ''.join(str(int(bit1) ^ int(bit2)) for bit1, bit2 in zip(bin_letter1, bin_letter2))
 
     # Convert the binary in char using 'chr()'
     return chr(int(result, 2))
+
+
+def euclid_extended(a, b):
+    '''
+        Finds the greatest common divisor between a and b, and numbers x and y that satisfy r = ax + by
+
+        Parameters
+        ----------
+            a (int): first number
+            b (int): second number
+
+        Returns
+        -------
+            gcd (int): the greatest common divisor between a and b
+            x (int): the factor x
+            y (int): the factor y
+    '''
+
+    # Swap a and b if a is lesser than b
+    if a < b:
+        c = a
+        a = b
+        b = c
+    
+    # First iteration
+    r = a % b
+    q = a // b
+
+    x0 = 1 
+    y0 = 0 
+    x1 = 0 
+    y1 = 1
+
+    x2 = x0 - q * x1
+    y2 = y0 - q * y1
+
+    # Iterate until the remainer is 0
+    # Last value of b will be the gcd
+    while r != 0:
+        a = b
+        b = r
+        r = a % b
+        q = a // b
+
+        if r != 0:
+            x0 = x1
+            y0 = y1
+            x1 = x2
+            y1 = y2
+
+            x2 = x0 - q * x1
+            y2 = y0 - q * y1
+
+    return b, x2, y2
 
 
 # Implementation of the Caesar Cypher
@@ -49,7 +106,6 @@ def caesar(plaintext: str, op_mode="enc"):
             i_cyp = (alphabet.index(ch) - 3) % 26
 
             cyp += alphabet[i_cyp]
-        
 
     return cyp
     
@@ -128,9 +184,6 @@ def linear_congruential_generator(X0: int, m = 2147483647, a = 16807, c = 0):
 
 
 # Runs an instance of the RC4 cypher
-import random
-import copy
-
 def rc4(stream, key_index=None):
 
     '''
